@@ -1,0 +1,68 @@
+#include <SPI.h>
+#include <MFRC522.h>
+
+MFRC522 mfrc522(10, 9);
+
+void setup()
+{
+Serial.begin(9600);
+SPI.begin();
+mfrc522.PCD_Init();
+pinMode(8, OUTPUT); // Green lamp 
+pinMode(7, OUTPUT); // Red   Lamp
+pinMode(6, OUTPUT); // alarm 
+Serial.println("WELCOME  TO OUR PROJECT  RFID ");
+Serial.println("_____________________________");
+Serial.println("please add your card ?");
+
+}
+void loop()
+{
+
+//here we have to wait for the card, when it is near to the sensor
+if ( ! mfrc522.PICC_IsNewCardPresent()){
+return;
+}
+//we can read it's value
+if ( ! mfrc522.PICC_ReadCardSerial()) {
+return;
+}
+  Serial.print("Tag:");
+
+String content= "";
+for (byte i = 0; i < mfrc522.uid.size; i++) {
+Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+Serial.print(mfrc522.uid.uidByte[i], HEX);
+content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+content.concat(String(mfrc522.uid.uidByte[i], HEX));
+}
+content.toUpperCase();
+content = content.substring(1);
+if(content == "13 17 DF 18"){                     //if condition 
+
+
+     
+     Serial.println();
+     Serial.println("********************");
+     Serial.println("**Authorised **");
+     
+     Serial.println("********************");
+     digitalWrite(6, HIGH);
+     digitalWrite(8, HIGH);  // TurnOF lamp 
+     delay(500);             //Duration 
+      digitalWrite(8,LOW);   // turnOFF
+      digitalWrite(6,LOW);   // turnOFF
+}else{                                            // else  Condition 
+       
+        Serial.println();
+       Serial.println("****************");
+       Serial.println("**Acces denied**");        
+       Serial.println("****************");
+       digitalWrite(6, HIGH);
+       digitalWrite(7, HIGH);  // TurnOn lamp 
+       delay(500);             //Duration 
+       digitalWrite(7, LOW);   // turnOFF
+       digitalWrite(6,LOW);   // turnOFF
+}
+Serial.println();
+}
